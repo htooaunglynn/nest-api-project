@@ -4,9 +4,13 @@ import {
     Post,
     HttpCode,
     HttpStatus,
+    UseGuards,
+    Get,
+    Req,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 class SignInDto {
     email: string;
@@ -19,13 +23,21 @@ export class AuthController {
 
     @HttpCode(HttpStatus.OK)
     @Post('login')
-    signIn(@Body() signInDto: SignInDto) {
+    async signIn(@Body() signInDto: SignInDto) {
         return this.authService.signIn(signInDto.email, signInDto.password);
     }
 
     @HttpCode(HttpStatus.CREATED)
     @Post('register')
-    register(@Body() createUserDto: CreateUserDto) {
+    async register(@Body() createUserDto: CreateUserDto) {
         return this.authService.signUp(createUserDto);
+    }
+
+    // Example protected route: GET /auth/profile
+    @UseGuards(JwtAuthGuard)
+    @Get('profile')
+    getProfile(@Req() req: any) {
+        // req.user is populated by JwtStrategy.validate
+        return req.user;
     }
 }
