@@ -1,0 +1,23 @@
+# Node & build artifacts
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-store
+
+# Dist output
+/dist
+
+# VCS
+.git
+.gitignore
+
+# Environment & config
+.env
+.env.*
+Dockerfile
+.dockerignore
+
+# Tests and local-only files
+/test
+*.md

@@ -7,39 +7,48 @@ import { UserEntity } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    @InjectRepository(UserEntity)
-    private readonly usersRepository: Repository<UserEntity>,
-  ) {}
+    constructor(
+        @InjectRepository(UserEntity)
+        private readonly usersRepository: Repository<UserEntity>,
+    ) { }
 
-  async create(createUserDto: CreateUserDto) {
-    const user = this.usersRepository.create(
-      createUserDto as Partial<UserEntity>,
-    );
-    return this.usersRepository.save(user);
-  }
+    async create(createUserDto: CreateUserDto) {
+        const user = this.usersRepository.create(
+            createUserDto as Partial<UserEntity>,
+        );
+        return this.usersRepository.save(user);
+    }
 
-  async findAll() {
-    return this.usersRepository.find();
-  }
+    async findAll(withPosts = false) {
+        return this.usersRepository.find({
+            relations: withPosts ? ['posts'] : [],
+        });
+    }
 
-  async findOne(id: number) {
-    const user = await this.usersRepository.findOneBy({ id });
-    if (!user) throw new NotFoundException(`User with id ${id} not found`);
-    return user;
-  }
+    async findOne(id: number, withPosts = false) {
+        const user = await this.usersRepository.findOne({
+            where: { id },
+            relations: withPosts ? ['posts'] : [],
+        });
+        if (!user) throw new NotFoundException(`User with id ${id} not found`);
+        return user;
+    }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
-    const user = await this.usersRepository.preload({
-      id,
-      ...(updateUserDto as object),
-    });
-    if (!user) throw new NotFoundException(`User with id ${id} not found`);
-    return this.usersRepository.save(user);
-  }
+    async update(id: number, updateUserDto: UpdateUserDto) {
+        const user = await this.usersRepository.preload({
+            id,
+            ...(updateUserDto as object),
+        });
+        if (!user) throw new NotFoundException(`User with id ${id} not found`);
+        return this.usersRepository.save(user);
+    }
 
-  async remove(id: number) {
-    const user = await this.findOne(id);
-    return this.usersRepository.remove(user);
-  }
+    async remove(id: number) {
+        const user = await this.findOne(id);
+        return this.usersRepository.remove(user);
+    }
+
+    async findByEmail(email: string) {
+        return this.usersRepository.findOne({ where: { email } });
+    }
 }
